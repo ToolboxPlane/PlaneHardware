@@ -1,71 +1,117 @@
-wallThickness = 2;
-ductHeight = 20;
+part = "both"; //[both, top, bottom]
+
+ductWidth = 39; //[200]
+ductLength = 59; //[200]
+ductDepth = 20; //[200]
+
+//Duct Wall Thickness
+wallThickness = 2; //[10]
+
+//Baseplate Width
+plateWidth = 47; //[200]
+//Baseplate Length
+plateLength = 99; //[200]
+basePlateThickness = 3; //[20]
+
+outletAngleDegrees = 30; //[90]
+outletWallThickness = 1; //[10]
+
+//Screwhole Diameter
+holeDiameter = 4; //[10]
+//X-offset from outer edge to center of screwhole
+xHoleOffset = 10; //[100]
+//Y-offset from outer edge to center of screwhole
+yHoleOffset = 14; //[100]
+
+module mountingHoles(depth){
+    x = plateLength - (2 * xHoleOffset);
+    y = plateWidth - (2 * yHoleOffset);
+    module mountingHole(depth, diameter) {
+        cylinder(h = depth, r = 0.5 * diameter, center = false, $fs=0.1);
+    }
+    union(){
+        mountingHole(depth, holeDiameter);
+        translate([x,0]) mountingHole(depth, holeDiameter);
+        translate([x,y]) mountingHole(depth, holeDiameter);
+        translate([0,y]) mountingHole(depth, holeDiameter);
+    }
+}
 
 module basePlate(){
-    difference(){
-            translate([-20, -4]){
-                cube([59+2*20, 39+2*4, wallThickness]);
-            }
-            {
-                translate([wallThickness, wallThickness, 0]){
-                    cube([59-2*wallThickness, 39-2*wallThickness, wallThickness]);
-                }
-                
-                translate([-10, 10, 0]){
-                    cylinder(h=wallThickness, r=1.5);
-                }
-                translate([-10, 39-10, 0]){
-                    cylinder(h=wallThickness, r=1.5);
-                }
-                translate([59+10, 10, 0]){
-                    cylinder(h=wallThickness, r=1.5);
-                }
-                translate([59+10, 39-10, 0]){
-                    cylinder(h=wallThickness, r=1.5);
-                }
-            }
+    cutoutX = ductLength - 2 * wallThickness;
+    cutoutY = ductWidth - 2 * wallThickness;
+    translate([-0.5 * plateLength, -0.5 * plateWidth]) difference(){
+        cube(size = [plateLength, plateWidth, basePlateThickness]);
+        translate([xHoleOffset, yHoleOffset, 0]){
+            mountingHoles(basePlateThickness);
         }
-}
-
-color("blue"){
-    difference(){
-        cube([59, 39, 28]);
-        translate([wallThickness, wallThickness, 0]){
-            cube([59-2*wallThickness, 39-2*wallThickness, 28]);
+        translate([0.5 * (plateLength - cutoutX), 0.5 * (plateWidth - cutoutY), 0]){ 
+            cube(size = [ cutoutX, cutoutY, basePlateThickness]);
         }
-    }
-    translate([0, 0, 28]){
-        basePlate();
     }
 }
 
-color("green"){
-    translate([0,0,28+10]){
-        basePlate();
-        difference(){
-            translate([0,39,wallThickness]){
-                rotate([90, 0, 0]){
-                    linear_extrude(39){
-                        polygon([
-                            [0,0],
-                            [59, 0],
-                            [59, ductHeight]
-                        ]);
-                    }
-                }
-            }
-            translate([0,39-wallThickness,wallThickness]){
-                rotate([90, 0, 0]){
-                    linear_extrude(39-2*wallThickness){
-                        polygon([
-                            [wallThickness,0],
-                            [59, 0],
-                            [59, ductHeight-wallThickness]
-                        ]);
-                    }
-                }
-            }
+module ductPipe(){
+    translate([-0.5 * ductLength, -0.5 * ductWidth]) difference(){
+        cube(size = [ductLength, ductWidth, ductDepth]);
+        translate([wallThickness, wallThickness]){
+            cube(size = [
+                ductLength - 2 * wallThickness,
+                ductWidth - 2 * wallThickness,
+                ductDepth]);
         }
     }
+}
+
+module duct(){
+    basePlate(plateLength, plateWidth);
+    translate([0, 0, -1 * ductDepth]) ductPipe();
+}
+
+module outlet(){
+    innerWidth = ductWidth - 2 * wallThickness;
+    innerLength = ductLength - 2 * wallThickness;
+    innerHeight = tan(outletAngleDegrees) * innerLength;
     
+    outerWidth = innerWidth + 2 * outletWallThickness;
+    outerHeight = innerHeight + (outletWallThickness/cos(outletAngleDegrees));
+    outerLength = outerHeight / tan(outletAngleDegrees);
+    
+    translate([-0.5 * innerLength, -0.5 * outerWidth, 0]){
+        difference(){
+            //Outer
+            translate ([0, outerWidth, 0]) rotate([90, 0, 0]) linear_extrude(outerWidth){
+                polygon(points=[
+                    [0, 0],
+                    [0, outerHeight], 
+                    [outerLength, 0]
+                ]);
+            }
+            //Inner
+            translate([0, innerWidth + outletWallThickness, 0]){
+                rotate([90, 0, 0]) linear_extrude(innerWidth){
+                    polygon(points=[
+                        [0, 0],
+                        [0, innerHeight], 
+                        [innerLength, 0]
+                    ]);
+                }
+            }
+        }
+    }
 }
+
+module ductCover() {
+    basePlate(plateLength, plateWidth);
+    translate([0, 0, basePlateThickness]) outlet();
+}
+
+if(part == "both"){
+    translate([0, 0, 50]) ductCover();
+    duct();
+} else if(part == "top"){
+    ductCover();
+} else{
+    duct();
+}
+
