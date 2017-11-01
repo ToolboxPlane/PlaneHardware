@@ -1,21 +1,27 @@
-outletWallThickness = 1;
-wallThickness = 2;
-basePlateThickness = 3;
+part = "both"; //[both, top, bottom]
 
-ductWidth = 39;
-ductLength = 59;
-ductDepth = 20;
+ductWidth = 39; //[200]
+ductLength = 59; //[200]
+ductDepth = 20; //[200]
 
-plateWidth = 47;
-plateLength = 99;
+//Duct Wall Thickness
+wallThickness = 2; //[10]
 
-holeDiameter = 4;
+//Baseplate Width
+plateWidth = 47; //[200]
+//Baseplate Length
+plateLength = 99; //[200]
+basePlateThickness = 3; //[20]
 
-outletAngleDegrees = 30;
+outletAngleDegrees = 30; //[90]
+outletWallThickness = 1; //[10]
 
-//Hole offset from outer edge to center of hole
-xHoleOffset = 10;
-yHoleOffset = 14;
+//Screwhole Diameter
+holeDiameter = 4; //[10]
+//X-offset from outer edge to center of screwhole
+xHoleOffset = 10; //[100]
+//Y-offset from outer edge to center of screwhole
+yHoleOffset = 14; //[100]
 
 module mountingHoles(depth){
     x = plateLength - (2 * xHoleOffset);
@@ -100,5 +106,12 @@ module ductCover() {
     translate([0, 0, basePlateThickness]) outlet();
 }
 
-translate([0, 0, 50]) ductCover();
-duct();
+if(part == "both"){
+    translate([0, 0, 50]) ductCover();
+    duct();
+} else if(part == "top"){
+    ductCover();
+} else{
+    duct();
+}
+
