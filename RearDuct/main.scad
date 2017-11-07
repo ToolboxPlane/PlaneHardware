@@ -73,20 +73,16 @@ module duct(){
 }
 
 
-function ductHeight(x) = sqrt(x)*4; 
+function ductHeight(x) = sqrt(x)*3; 
 
 module outlet(){
     innerWidth = ductWidth - 2 * wallThickness;
     innerLength = ductLength - 2 * wallThickness;
-    innerHeight = tan(outletAngleDegrees) * innerLength;
     
     outerWidth = innerWidth + 2 * outletWallThickness;
-    outerHeight = innerHeight + (outletWallThickness/cos(outletAngleDegrees));
-    outerLength = outerHeight / tan(outletAngleDegrees);
     
-    outletRes = 1;
     translate([-0.5 * innerLength, -0.5 * outerWidth, 0]){
-        for(y = [0:outletRes:outerLength-outletRes]){
+        for(y = [0:outletRes:innerLength]){
             difference(){
                 //Outer
                 translate ([y-outletRes, outerWidth, 0]) rotate([90, 0, 0]) linear_extrude(outerWidth){
