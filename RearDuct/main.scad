@@ -23,6 +23,10 @@ xHoleOffset = 10; //[100]
 //Y-offset from outer edge to center of screwhole
 yHoleOffset = 14; //[100]
 
+// Distance between polygons in the outlet
+outletRes = 1; //[1]
+
+
 module mountingHoles(depth){
     x = plateLength - (2 * xHoleOffset);
     y = plateWidth - (2 * yHoleOffset);
@@ -68,35 +72,38 @@ module duct(){
     translate([0, 0, -1 * ductDepth]) ductPipe();
 }
 
+
+function ductHeight(x) = sqrt(x)*3; 
+
 module outlet(){
     innerWidth = ductWidth - 2 * wallThickness;
     innerLength = ductLength - 2 * wallThickness;
-    innerHeight = tan(outletAngleDegrees) * innerLength;
     
     outerWidth = innerWidth + 2 * outletWallThickness;
-    outerHeight = innerHeight + (outletWallThickness/cos(outletAngleDegrees));
-    outerLength = outerHeight / tan(outletAngleDegrees);
     
     translate([-0.5 * innerLength, -0.5 * outerWidth, 0]){
-        difference(){
-            //Outer
-            translate ([0, outerWidth, 0]) rotate([90, 0, 0]) linear_extrude(outerWidth){
-                polygon(points=[
-                    [0, 0],
-                    [0, outerHeight], 
-                    [outerLength, 0]
-                ]);
-            }
-            //Inner
-            translate([0, innerWidth + outletWallThickness, 0]){
-                rotate([90, 0, 0]) linear_extrude(innerWidth){
+        for(y = [0:outletRes:innerLength]){
+            difference(){
+                //Outer
+                translate ([y-outletRes, outerWidth, 0]) rotate([90, 0, 0]) linear_extrude(outerWidth){
+                    
                     polygon(points=[
                         [0, 0],
-                        [0, innerHeight], 
-                        [innerLength, 0]
+                        [0, ductHeight(y)],
+                        [outletRes, ductHeight(y+1)], 
+                        [outletRes, 0]
                     ]);
                 }
-            }
+                //Inner
+                translate ([y-outletRes, innerWidth+outletWallThickness, 0]) rotate([90, 0, 0]) linear_extrude(innerWidth){
+                    polygon(points=[
+                        [0, 0],
+                        [0, ductHeight(y)-outletWallThickness],
+                        [outletRes, ductHeight(y+1)-outletWallThickness], 
+                        [outletRes, 0]
+                    ]);
+                }
+             }
         }
     }
 }
