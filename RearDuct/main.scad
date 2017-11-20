@@ -41,6 +41,20 @@ module mountingHoles(depth){
     }
 }
 
+module nutHoles(depth) {
+    x = plateLength - (2 * xHoleOffset);
+    y = plateWidth - (2 * yHoleOffset);
+    module nutHole(depth, diameter) {
+        cylinder(h = depth, r = 3.8, center = false, $fn=6);
+    }
+    union(){
+        nutHole(depth, holeDiameter);
+        translate([x,0]) nutHole(depth, holeDiameter);
+        translate([x,y]) nutHole(depth, holeDiameter);
+        translate([0,y]) nutHole(depth, holeDiameter);
+    }
+}
+
 module basePlate(){
     cutoutX = ductLength - 2 * wallThickness;
     cutoutY = ductWidth - 2 * wallThickness;
@@ -68,12 +82,17 @@ module ductPipe(){
 }
 
 module duct(){
-    basePlate(plateLength, plateWidth);
+    difference(){
+         basePlate(plateLength, plateWidth);
+         translate([-0.5 * plateLength + xHoleOffset, -0.5 * plateWidth + yHoleOffset]) {
+            nutHoles(basePlateThickness/2);
+         }
+    }
     translate([0, 0, -1 * ductDepth]) ductPipe();
 }
 
 
-function ductHeight(x) = sqrt(x)*3; 
+function ductHeight(x) = sqrt(x)*5/6*PI; 
 
 module outlet(){
     innerWidth = ductWidth - 2 * wallThickness;
