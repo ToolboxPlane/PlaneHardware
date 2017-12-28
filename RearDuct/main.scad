@@ -11,7 +11,7 @@ wallThickness = 2; //[10]
 plateWidth = 47; //[200]
 //Baseplate Length
 plateLength = 99; //[200]
-basePlateThickness = 3; //[20]
+basePlateThickness = 4; //[20]
 
 outletAngleDegrees = 30; //[90]
 outletWallThickness = 1; //[10]
@@ -85,7 +85,7 @@ module duct(){
     difference(){
          basePlate(plateLength, plateWidth);
          translate([-0.5 * plateLength + xHoleOffset, -0.5 * plateWidth + yHoleOffset]) {
-            nutHoles(basePlateThickness/2);
+            nutHoles(3);
          }
     }
     translate([0, 0, -1 * ductDepth]) ductPipe();
