@@ -18,6 +18,9 @@ outletWallThickness = 1; //[10]
 
 //Screwhole Diameter
 holeDiameter = 4; //[10]
+
+screwHeadDiameter = 7.2;
+
 //X-offset from outer edge to center of screwhole
 xHoleOffset = 10; //[100]
 //Y-offset from outer edge to center of screwhole
@@ -31,7 +34,7 @@ module mountingHoles(depth){
     x = plateLength - (2 * xHoleOffset);
     y = plateWidth - (2 * yHoleOffset);
     module mountingHole(depth, diameter) {
-        cylinder(h = depth, r = 0.5 * diameter, center = false, $fs=0.1);
+        cylinder(h = depth, r1 = 0.5 * diameter, r2 = 0.5 * screwHeadDiameter, center = false, $fs=0.1);
     }
     union(){
         mountingHole(depth, holeDiameter);
